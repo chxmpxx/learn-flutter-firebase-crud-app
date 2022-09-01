@@ -2,6 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+// ไว้อ่าน path
+import 'package:path/path.dart' as Path;
 
 class PhotoUploadScreen extends StatefulWidget {
   PhotoUploadScreen({Key? key}) : super(key: key);
@@ -17,6 +20,9 @@ class _PhotoUploadScreenState extends State<PhotoUploadScreen> {
 
   // สร้าง Object สำหรับเลือกรูปภาพ
   final picker = ImagePicker();
+
+  // ตัวแปรไว้แสดง Loading
+  bool isLoading = false;
 
   // ฟังก์ชันเปิดจากแกลเลอรี่
   _openGallery(BuildContext context) async {
@@ -84,7 +90,7 @@ class _PhotoUploadScreenState extends State<PhotoUploadScreen> {
       ),
       body: Container(
         child: Center(
-          child: Column(
+          child: isLoading ? CircularProgressIndicator() : Column(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             mainAxisSize: MainAxisSize.max,
             children: [
@@ -93,11 +99,15 @@ class _PhotoUploadScreenState extends State<PhotoUploadScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   RaisedButton(
-                    onPressed: (){},
+                    onPressed: (){
+                      uploadImage();
+                    },
                     child: Text('Upload to firebase'),
                   ),
                   RaisedButton(
-                    onPressed: (){},
+                    onPressed: (){
+                      clearImage();
+                    },
                     child: Text('Clear Image'),
                   ),
                 ],
@@ -115,4 +125,35 @@ class _PhotoUploadScreenState extends State<PhotoUploadScreen> {
       ),
     );
   }
+
+  // ฟังก์ชันอัปโหลดไฟล์ขึ้น Firebase
+  Future uploadImage() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    // Create a Reference to the file
+    Reference ref = FirebaseStorage.instance.ref().child('profile').child('/${Path.basename(_imageFile!.path)}');
+    UploadTask uploadTask;
+    final metadata = SettableMetadata(
+      contentType: 'image/jpeg',
+      customMetadata: {'picked-file-path': _imageFile!.path},
+    );
+    uploadTask = ref.putData(await _imageFile!.readAsBytes(), metadata);
+    await uploadTask.whenComplete((){
+      setState(() {
+        isLoading = false;
+        print('Upload Success');
+      });
+    });
+    clearImage();
+  }
+
+  // ฟังก์ชันเคลียร์รูปภาพออก
+  void clearImage(){
+    setState(() {
+      _imageFile = null;
+    });
+  }
+
 }
