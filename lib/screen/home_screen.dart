@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:firebase_crud_app/screen/photo_upload_screen.dart';
 import 'package:firebase_crud_app/services/firebase_crud.dart';
 import 'package:flutter/material.dart';
 
@@ -15,10 +16,11 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Home'),
+        backgroundColor: Colors.pink[300],
         actions: [
           IconButton(
             onPressed: (){
-              // Navigator.push(context, MaterialPageRoute(builder: (context) => PhotoUploadScreen()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => PhotoUploadScreen()));
             },
             icon: Icon(Icons.photo_camera),
           )
